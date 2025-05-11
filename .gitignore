@@ -3,3 +3,7 @@
 /features/mfcc_segments
 .venv
 .idea
+/results/svm_logmel/pca_svm_logmel.pkl
+/results/svm_logmel/svm_model_logmel.pkl
+/results/svm_mfcc/pca_svm_mfcc.pkl
+/results/svm_mfcc/svm_model_mfcc.pkl
