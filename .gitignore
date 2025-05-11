@@ -11,3 +11,7 @@
 /results/dt_logmel/pca_dt_logmel.pkl
 /results/dt_mfcc/dt_model_mfcc.pkl
 /results/dt_mfcc/pca_dt_mfcc.pkl
+results/knn_logmel/knn_model.pkl
+results/knn_logmel/pca_knn_logmel.pkl
+results/knn_mfcc/knn_model.pkl
+results/knn_mfcc/pca_knn_mfcc.pkl

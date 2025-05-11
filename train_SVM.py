@@ -53,7 +53,38 @@ def save_metrics(out_dir, name, acc, f1, wacc, report, cm, fpr, tpr, roc_auc):
     plt.savefig(os.path.join(out_dir, f"{name}_roc_curve.png"))
     plt.close()
 
-def train_svm(train_csv, val_csv, out_dir, feature_type="logmel", n_components=200):
+def evaluate_on_test(test_csv, out_dir, feature_type, label_encoder):
+    model_path = os.path.join(out_dir, f"svm_model_{feature_type}.pkl")
+    pca_path = os.path.join(out_dir, f"pca_svm_{feature_type}.pkl")
+
+    X_test, y_test_str = load_data(test_csv, feature_type)
+    y_test = label_encoder.transform(y_test_str)
+
+    model = joblib.load(model_path)
+    pca = joblib.load(pca_path)
+    X_test_p = pca.transform(X_test)
+
+    y_pred = model.predict(X_test_p)
+    y_prob = model.predict_proba(X_test_p)[:, 1] if len(label_encoder.classes_) == 2 else None
+
+    acc = accuracy_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred, average='macro')
+    wacc = weighted_accuracy(y_test, y_pred, label_encoder)
+    report = classification_report(y_test, y_pred, target_names=label_encoder.classes_)
+    cm = confusion_matrix(y_test, y_pred)
+
+    print("\n🧪 Test Set Evaluation:")
+    print("Accuracy:", acc)
+    print("F1 Score:", f1)
+    print("Weighted Accuracy:", wacc)
+    print(report)
+
+    if y_prob is not None:
+        fpr, tpr, _ = roc_curve(y_test, y_prob)
+        roc_auc = auc(fpr, tpr)
+        save_metrics(out_dir, f"svm_{feature_type}_test", acc, f1, wacc, report, cm, fpr, tpr, roc_auc)
+
+def train_svm(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_components=200):
     os.makedirs(out_dir, exist_ok=True)
     X_train, y_train_str = load_data(train_csv, feature_type)
     X_val, y_val_str = load_data(val_csv, feature_type)
@@ -92,10 +123,14 @@ def train_svm(train_csv, val_csv, out_dir, feature_type="logmel", n_components=2
         roc_auc = auc(fpr, tpr)
         save_metrics(out_dir, f"svm_{feature_type}", acc, f1, wacc, report, cm, fpr, tpr, roc_auc)
 
+    # Evaluate on test set
+    evaluate_on_test(test_csv, out_dir, feature_type, label_encoder)
+
 if __name__ == "__main__":
     train_svm(
         train_csv="features/splits/index_train.csv",
         val_csv="features/splits/index_val.csv",
+        test_csv="features/splits/index_test.csv",
         out_dir="results/svm_logmel/",
         feature_type="logmel",
         n_components=200
@@ -104,6 +139,7 @@ if __name__ == "__main__":
     train_svm(
         train_csv="features/splits/index_train.csv",
         val_csv="features/splits/index_val.csv",
+        test_csv="features/splits/index_test.csv",
         out_dir="results/svm_mfcc/",
         feature_type="mfcc",
         n_components=200
