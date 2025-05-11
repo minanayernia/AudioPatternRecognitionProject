@@ -7,3 +7,7 @@
 /results/svm_logmel/svm_model_logmel.pkl
 /results/svm_mfcc/pca_svm_mfcc.pkl
 /results/svm_mfcc/svm_model_mfcc.pkl
+/results/dt_logmel/dt_model_logmel.pkl
+/results/dt_logmel/pca_dt_logmel.pkl
+/results/dt_mfcc/dt_model_mfcc.pkl
+/results/dt_mfcc/pca_dt_mfcc.pkl
