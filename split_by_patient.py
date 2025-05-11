@@ -6,7 +6,7 @@ import os
 def split_index_by_patient(index_csv, output_dir, seed=42, train_ratio=0.7, val_ratio=0.15):
     df = pd.read_csv(index_csv)
 
-    # Filter out unknown labels (optional but recommended)
+    # Filter out unknown labels
     df = df[df["label"] != "Unknown"].reset_index(drop=True)
 
     # Unique patient IDs
