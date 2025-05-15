@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 def load_data(index_csv, feature_type):
     df = pd.read_csv(index_csv)
-    df = df[df['label'] != "Unknown"].reset_index(drop=True)
+    # df = df[df['label'] != "Unknown"].reset_index(drop=True)
     X, y = [], []
     for _, row in tqdm(df.iterrows(), total=len(df), desc=f"Loading {feature_type} features"):
         try:
@@ -24,13 +24,30 @@ def load_data(index_csv, feature_type):
     return np.array(X), np.array(y)
 
 def weighted_accuracy(y_true, y_pred, label_encoder):
-    labels = list(label_encoder.transform(["Normal", "Abnormal"]))
-    cm = confusion_matrix(y_true, y_pred, labels=labels)
-    if cm.shape != (2, 2): return 0.0
-    tn, fp, fn, tp = cm.ravel()
-    sensitivity = tp / (tp + fn + 1e-8)
-    specificity = tn / (tn + fp + 1e-8)
-    return (specificity + 2 * sensitivity) / 3
+    # Decode integer labels back to strings
+    y_true_str = label_encoder.inverse_transform(y_true)
+    y_pred_str = label_encoder.inverse_transform(y_pred)
+
+    labels = ["Absent", "Present", "Unknown"]
+    cm = {true: {pred: 0 for pred in labels} for true in labels}
+
+    # Build confusion matrix manually
+    for yt, yp in zip(y_true_str, y_pred_str):
+        cm[yt][yp] += 1
+
+    # Extract counts from matrix
+    mAA = cm["Absent"]["Absent"]
+    mPP = cm["Present"]["Present"]
+    mUU = cm["Unknown"]["Unknown"]
+
+    sum_iA = sum(cm[i]["Absent"] for i in labels)
+    sum_iP = sum(cm[i]["Present"] for i in labels)
+    sum_iU = sum(cm[i]["Unknown"] for i in labels)
+
+    numerator = mAA + 5 * mPP + 3 * mUU
+    denominator = sum_iA + 5 * sum_iP + 3 * sum_iU
+
+    return numerator / (denominator + 1e-8)
 
 def save_metrics(out_dir, name, acc, f1, wacc, report, cm, fpr, tpr, roc_auc):
     with open(os.path.join(out_dir, f"{name}_metrics.txt"), "w") as f:

@@ -1,7 +1,6 @@
 import os
 import librosa
 from librosa import feature
-print("librosa module path:", librosa.__file__)
 import numpy as np
 import pandas as pd
 
@@ -21,7 +20,7 @@ def segment_audio(y, sr, frame_duration=5.0, overlap_sec=1.0):
 
 
 def extract_logmel(y, sr, n_mels=128, hop_length=256, n_fft=1024):
-    assert callable(librosa.feature.melspectrogram), "❌ melspectrogram is not callable! It was likely overwritten."
+    assert callable(librosa.feature.melspectrogram), " melspectrogram is not callable! It was likely overwritten."
 
     mel = librosa.feature.melspectrogram(y=y, sr=sr, n_fft=n_fft,
                                          hop_length=hop_length, n_mels=n_mels)
@@ -49,13 +48,15 @@ def get_label_from_txt(subject_id, subject_dir):
             for line in f:
                 if line.startswith("#Murmur:"):
                     murmur = line.split(":")[1].strip().lower()
-                    if murmur == "present":
-                        return "Abnormal"
-                    elif murmur == "absent":
-                        return "Normal"
+                    print(f"murmur : {murmur}")
+                    return murmur.capitalize()  # Capitalize to match "Present" or "Absent"
+                    # if murmur == "Present":
+                    #     return "Present"
+                    # elif murmur == "Absent":
+                    #     return "Absent"
         return "Unknown"
     except Exception as e:
-        print(f"⚠️ Error reading label from {txt_path}: {e}")
+        print(f"Error reading label from {txt_path}: {e}")
         return "Unknown"
 
 
@@ -63,7 +64,7 @@ def get_label_from_txt(subject_id, subject_dir):
 # Main dataset processing
 # ---------------------------
 def process_dataset(data_dir, index_csv):
-    print("📂 Processing dataset...")
+    print("Processing dataset...")
     os.makedirs("features/logmel_segments/", exist_ok=True)
     os.makedirs("features/mfcc_segments/", exist_ok=True)
     index = []
@@ -84,7 +85,6 @@ def process_dataset(data_dir, index_csv):
             for i, seg in enumerate(segments):
 
                 # LOGMEL FEATURE
-                print("Extracting logmel feature...")
                 logmel = extract_logmel(seg, sr)
                 logmel_name = f"{os.path.splitext(fname)[0]}_seg{i}.npy"
                 logmel_path = os.path.join("features/logmel_segments/", logmel_name)
@@ -105,15 +105,14 @@ def process_dataset(data_dir, index_csv):
                     "mfcc_path": mfcc_path
                 })
 
-            print(f"✅ Processed {fname} into {len(segments)} segments")
+            print(f"Processed {fname} into {len(segments)} segments")
 
         except Exception as e:
-            print(f"❌ Failed on {fname}: {e}")
+            print(f"Failed on {fname}: {e}")
 
     df = pd.DataFrame(index)
     df.to_csv(index_csv, index=False)
-    print(f"\n📦 Saved index file to {index_csv}")
-
+    print(f"Saved index file to {index_csv}")
 
 
 if __name__ == "__main__":
