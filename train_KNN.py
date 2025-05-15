@@ -59,16 +59,6 @@ def save_metrics(out_dir, name, acc, f1, wacc, report, cm, fpr, tpr, roc_auc):
         f.write("\nConfusion Matrix:\n")
         f.write(np.array2string(cm))
 
-    # Save ROC curve
-    plt.figure()
-    plt.plot(fpr, tpr, label=f"ROC curve (area = {roc_auc:.2f})")
-    plt.plot([0, 1], [0, 1], linestyle='--')
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title("ROC Curve")
-    plt.legend()
-    plt.savefig(os.path.join(out_dir, f"{name}_roc_curve.png"))
-    plt.close()
 
 def evaluate_on_test(test_csv, out_dir, feature_type, label_encoder):
     model_path = os.path.join(out_dir, f"knn_model.pkl")
@@ -103,6 +93,9 @@ def evaluate_on_test(test_csv, out_dir, feature_type, label_encoder):
         fpr, tpr, _ = roc_curve(y_test, y_prob)
         roc_auc = auc(fpr, tpr)
         save_metrics(out_dir, f"knn_{feature_type}_test", acc, f1, wacc, report, cm, fpr, tpr, roc_auc)
+    else:
+        save_metrics(out_dir, f"knn_{feature_type}_test", acc, f1, wacc, report, cm, None, None, None)
+
 
 def train_knn(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_components=200):
     os.makedirs(out_dir, exist_ok=True)
@@ -123,10 +116,7 @@ def train_knn(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_co
     joblib.dump(knn, os.path.join(out_dir, "knn_model.pkl"))
 
     y_pred = knn.predict(X_val_p)
-    if hasattr(knn, "predict_proba"):
-        y_prob = knn.predict_proba(X_val_p)[:, 1] if len(label_encoder.classes_) == 2 else None
-    else:
-        y_prob = None
+    y_prob = knn.predict_proba(X_val_p)[:, 1] if hasattr(knn, "predict_proba") and len(label_encoder.classes_) == 2 else None
 
     acc = accuracy_score(y_val, y_pred)
     f1 = f1_score(y_val, y_pred, average='macro')
@@ -134,7 +124,7 @@ def train_knn(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_co
     report = classification_report(y_val, y_pred, target_names=label_encoder.classes_)
     cm = confusion_matrix(y_val, y_pred)
 
-    print("\n📊 KNN Evaluation:")
+    print("\n📊 KNN Evaluation (Validation Set):")
     print("Accuracy:", acc)
     print("F1 Score:", f1)
     print("Weighted Accuracy:", wacc)
@@ -143,7 +133,9 @@ def train_knn(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_co
     if y_prob is not None:
         fpr, tpr, _ = roc_curve(y_val, y_prob)
         roc_auc = auc(fpr, tpr)
-        save_metrics(out_dir, f"knn_{feature_type}", acc, f1, wacc, report, cm, fpr, tpr, roc_auc)
+        save_metrics(out_dir, f"knn_{feature_type}_val", acc, f1, wacc, report, cm, fpr, tpr, roc_auc)
+    else:
+        save_metrics(out_dir, f"knn_{feature_type}_val", acc, f1, wacc, report, cm, None, None, None)
 
     evaluate_on_test(test_csv, out_dir, feature_type, label_encoder)
 

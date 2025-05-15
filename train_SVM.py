@@ -59,16 +59,18 @@ def save_metrics(out_dir, name, acc, f1, wacc, report, cm, fpr, tpr, roc_auc):
         f.write("\nConfusion Matrix:\n")
         f.write(np.array2string(cm))
 
-    # Save ROC curve
-    plt.figure()
-    plt.plot(fpr, tpr, label=f"ROC curve (area = {roc_auc:.2f})")
-    plt.plot([0, 1], [0, 1], linestyle='--')
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title("ROC Curve")
-    plt.legend()
-    plt.savefig(os.path.join(out_dir, f"{name}_roc_curve.png"))
-    plt.close()
+    # Save ROC curve only if values are present
+    if fpr is not None and tpr is not None and roc_auc is not None:
+        plt.figure()
+        plt.plot(fpr, tpr, label=f"ROC curve (area = {roc_auc:.2f})")
+        plt.plot([0, 1], [0, 1], linestyle='--')
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.title("ROC Curve")
+        plt.legend()
+        plt.savefig(os.path.join(out_dir, f"{name}_roc_curve.png"))
+        plt.close()
+
 
 def evaluate_on_test(test_csv, out_dir, feature_type, label_encoder):
     model_path = os.path.join(out_dir, f"svm_model_{feature_type}.pkl")
@@ -100,6 +102,9 @@ def evaluate_on_test(test_csv, out_dir, feature_type, label_encoder):
         fpr, tpr, _ = roc_curve(y_test, y_prob)
         roc_auc = auc(fpr, tpr)
         save_metrics(out_dir, f"svm_{feature_type}_test", acc, f1, wacc, report, cm, fpr, tpr, roc_auc)
+    else:
+        save_metrics(out_dir, f"svm_{feature_type}_test", acc, f1, wacc, report, cm, None, None, None)
+
 
 def train_svm(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_components=200):
     os.makedirs(out_dir, exist_ok=True)
@@ -138,7 +143,9 @@ def train_svm(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_co
     if y_prob is not None:
         fpr, tpr, _ = roc_curve(y_val, y_prob)
         roc_auc = auc(fpr, tpr)
-        save_metrics(out_dir, f"svm_{feature_type}", acc, f1, wacc, report, cm, fpr, tpr, roc_auc)
+        save_metrics(out_dir, f"svm_{feature_type}_val", acc, f1, wacc, report, cm, fpr, tpr, roc_auc)
+    else:
+        save_metrics(out_dir, f"svm_{feature_type}_val", acc, f1, wacc, report, cm, None, None, None)
 
     # Evaluate on test set
     evaluate_on_test(test_csv, out_dir, feature_type, label_encoder)
@@ -148,7 +155,7 @@ if __name__ == "__main__":
         train_csv="features/splits/index_train.csv",
         val_csv="features/splits/index_val.csv",
         test_csv="features/splits/index_test.csv",
-        out_dir="results/svm_logmel/",
+        out_dir="results/svm_logmel_unknown_label_v1/",
         feature_type="logmel",
         n_components=200
     )
@@ -157,7 +164,7 @@ if __name__ == "__main__":
         train_csv="features/splits/index_train.csv",
         val_csv="features/splits/index_val.csv",
         test_csv="features/splits/index_test.csv",
-        out_dir="results/svm_mfcc/",
+        out_dir="results/svm_mfcc_unknown_label_v1/",
         feature_type="mfcc",
         n_components=200
     )
