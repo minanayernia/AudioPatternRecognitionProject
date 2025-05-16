@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 
 def load_data(index_csv, feature_type):
     df = pd.read_csv(index_csv)
-    # df = df[df['label'] != "Unknown"].reset_index(drop=True)
     X, y = [], []
     for _, row in tqdm(df.iterrows(), total=len(df), desc=f"Loading {feature_type} features"):
         try:
@@ -92,7 +91,7 @@ def evaluate_on_test(test_csv, out_dir, feature_type, label_encoder):
     report = classification_report(y_test, y_pred, target_names=label_encoder.classes_)
     cm = confusion_matrix(y_test, y_pred)
 
-    print("\n🧪 Test Set Evaluation:")
+    print("Test Set Evaluation:")
     print("Accuracy:", acc)
     print("F1 Score:", f1)
     print("Weighted Accuracy:", wacc)
@@ -120,7 +119,7 @@ def train_svm(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_co
     X_val_p = pca.transform(X_val)
     joblib.dump(pca, os.path.join(out_dir, f"pca_svm_{feature_type}.pkl"))
 
-    print("\n⚙️ Training SVM (kernel='rbf') — may take time...")
+    print("Training SVM (kernel='rbf') — may take time...")
     svm = SVC(kernel='rbf', C=1.0, probability=True)
     svm.fit(X_train_p, y_train)
     joblib.dump(svm, os.path.join(out_dir, f"svm_model_{feature_type}.pkl"))
@@ -134,7 +133,7 @@ def train_svm(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_co
     report = classification_report(y_val, y_pred, target_names=label_encoder.classes_)
     cm = confusion_matrix(y_val, y_pred)
 
-    print("\n📊 SVM Evaluation:")
+    print("SVM Evaluation:")
     print("Accuracy:", acc)
     print("F1 Score:", f1)
     print("Weighted Accuracy:", wacc)

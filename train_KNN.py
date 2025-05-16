@@ -1,4 +1,3 @@
-# train_knn.py
 import os
 import numpy as np
 import pandas as pd
@@ -12,7 +11,6 @@ import matplotlib.pyplot as plt
 
 def load_data(index_csv, feature_type="logmel"):
     df = pd.read_csv(index_csv)
-    # df = df[df['label'] != "Unknown"].reset_index(drop=True)
     X, y = [], []
     for _, row in tqdm(df.iterrows(), total=len(df), desc=f"Loading {feature_type} features"):
         try:
@@ -20,7 +18,7 @@ def load_data(index_csv, feature_type="logmel"):
             X.append(feature.flatten())
             y.append(row['label'])
         except Exception as e:
-            print(f"⚠️ Failed to load {row[f'{feature_type}_path']}: {e}")
+            print(f"Failed to load {row[f'{feature_type}_path']}: {e}")
     return np.array(X), np.array(y)
 
 def weighted_accuracy(y_true, y_pred, label_encoder):
@@ -83,7 +81,7 @@ def evaluate_on_test(test_csv, out_dir, feature_type, label_encoder):
     report = classification_report(y_test, y_pred, target_names=label_encoder.classes_)
     cm = confusion_matrix(y_test, y_pred)
 
-    print("\n🧪 Test Set Evaluation:")
+    print("Test Set Evaluation:")
     print("Accuracy:", acc)
     print("F1 Score:", f1)
     print("Weighted Accuracy:", wacc)
@@ -124,7 +122,7 @@ def train_knn(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_co
     report = classification_report(y_val, y_pred, target_names=label_encoder.classes_)
     cm = confusion_matrix(y_val, y_pred)
 
-    print("\n📊 KNN Evaluation (Validation Set):")
+    print("KNN Evaluation (Validation Set):")
     print("Accuracy:", acc)
     print("F1 Score:", f1)
     print("Weighted Accuracy:", wacc)

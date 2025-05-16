@@ -45,7 +45,7 @@ def plot_kmeans(X_2d, kmeans_labels, feature_name, k):
     plt.close()
 
 def run_clustering(feature_type):
-    print(f"\n🚀 Processing {feature_type}")
+    print(f"Processing {feature_type}")
     paths = df[f"{feature_type}_path"]
     labels = df["label"].values
 

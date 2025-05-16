@@ -1,4 +1,3 @@
-# train_dt.py
 import os
 import numpy as np
 import pandas as pd
@@ -12,7 +11,6 @@ import matplotlib.pyplot as plt
 
 def load_data(index_csv, feature_type="logmel"):
     df = pd.read_csv(index_csv)
-    # df = df[df['label'] != "Unknown"].reset_index(drop=True)
     X, y = [], []
     for _, row in tqdm(df.iterrows(), total=len(df), desc=f"Loading {feature_type} features"):
         try:
@@ -92,7 +90,7 @@ def evaluate_on_test(test_csv, out_dir, feature_type, label_encoder):
     report = classification_report(y_test, y_pred, target_names=label_encoder.classes_)
     cm = confusion_matrix(y_test, y_pred)
 
-    print("\n🧪 Test Set Evaluation:")
+    print("Test Set Evaluation:")
     print("Accuracy:", acc)
     print("F1 Score:", f1)
     print("Weighted Accuracy:", wacc)
@@ -120,7 +118,7 @@ def train_dt(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_com
     X_val_p = pca.transform(X_val)
     joblib.dump(pca, os.path.join(out_dir, f"pca_dt_{feature_type}.pkl"))
 
-    print("\n🌳 Training Decision Tree...")
+    print("Training Decision Tree...")
     dt = DecisionTreeClassifier(random_state=42)
     dt.fit(X_train_p, y_train)
     joblib.dump(dt, os.path.join(out_dir, f"dt_model_{feature_type}.pkl"))
@@ -134,7 +132,7 @@ def train_dt(train_csv, val_csv, test_csv, out_dir, feature_type="logmel", n_com
     report = classification_report(y_val, y_pred, target_names=label_encoder.classes_)
     cm = confusion_matrix(y_val, y_pred)
 
-    print("\n📊 Decision Tree Evaluation:")
+    print("Decision Tree Evaluation:")
     print("Accuracy:", acc)
     print("F1 Score:", f1)
     print("Weighted Accuracy:", wacc)
