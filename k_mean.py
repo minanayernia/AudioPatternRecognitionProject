@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import os
 
-# === CONFIG ===
 df = pd.read_csv("features/index.csv")
 os.makedirs("results/cluster_viz", exist_ok=True)
 
@@ -18,7 +17,7 @@ def load_features(paths):
             arr = np.load(path)
             data.append(arr.flatten())
         except Exception as e:
-            print(f"⚠️ Failed to load {path}: {e}")
+            print(f"Failed to load {path}: {e}")
     return np.stack(data)
 
 def plot_true_labels(X_2d, labels, feature_name):
@@ -62,6 +61,5 @@ def run_clustering(feature_type):
         clusters = kmeans.fit_predict(X)
         plot_kmeans(X_2d, clusters, feature_type, k)
 
-# === Run for both features ===
 run_clustering("logmel")
 run_clustering("mfcc")

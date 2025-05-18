@@ -19,7 +19,7 @@ def load_data(index_csv, feature_type):
             X.append(feature.flatten())
             y.append(row['label'])
         except Exception as e:
-            print(f"⚠️ Failed to load {row[f'{feature_type}_path']}: {e}")
+            print(f"Failed to load {row[f'{feature_type}_path']}: {e}")
     return np.array(X), np.array(y)
 
 def weighted_accuracy(y_true, y_pred, label_encoder):
