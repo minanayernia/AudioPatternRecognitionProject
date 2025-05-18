@@ -49,7 +49,7 @@ Audio-Pattern-Recognition-Project/
 3. **Label Extraction**:
 
    * From `#Murmur:` line in subject description `.txt`
-   * Labels used: `Normal`, `Abnormal`, and optionally `Unknown`
+   * Labels used: `Absent`, `Present`, and optionally `Unknown`
 
 ## Models Trained
 
